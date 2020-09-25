@@ -1,0 +1,14 @@
+$brower_default_font_size: 30px !default  ;
+$Theme_color:#f00025;
+html{
+  font-size: $brower_default_font_size;
+}
+
+@function rems($px){
+  @return $px / $brower_default_font_size * 1rem;
+}
+
+.cell_interval{
+  margin-top: rems(20px);
+}
+
