@@ -22,20 +22,20 @@
         <van-list
             v-model="loading"
             finished-text="没有更多了"
-            @load="onLoad"
-        >
-          <van-cell v-for="(item,index) in dataList" class="music_user_name" :key="index">
-            <p >{{item.name}}</p>
-            <p >{{getMusicName(item)}}</p>
-            <p>{{item.alias  ? item.alias.toString()  : ''}}</p>
-          </van-cell>
+            @load="onLoad">
+          <van-cell-group>
+            <van-cell v-for="(item,index) in dataList" class="music_user_name" :key="index" @click="openMusic(item)">
+                <p class="music_title">{{item.name}} <span class="music_alias">{{ item.alia.length  ? `(${item.alia.toString()})`  : ''}}</span></p>
+                <p class="music_author">{{getMusicName(item)}}</p>
+            </van-cell>
+          </van-cell-group>
         </van-list>
       </div>
   </div>
 </template>
 
 <script>
-import {search,searchHot} from '../../request/requestUrl';
+import {search,searchHot,getMusicUrl} from '../../request/requestUrl';
 export default {
 name: "searchView",
   data(){
@@ -56,8 +56,8 @@ name: "searchView",
      */
     getMusicName(item){
       let artistsName="";
-      item.artists.forEach((items,index)=>{
-        if(index >= item.artists.length-1){
+      item.ar.forEach((items,index)=>{
+        if(index >= item.ar.length-1){
           artistsName+=items.name;
         }else{
           artistsName+=items.name+"/"
@@ -106,14 +106,23 @@ name: "searchView",
     getSeachList(){
       this.$toast.loading('正在搜索');
       this.requestSearchList(this.page).then((res)=>{
+        this.$toast.clear();
         if(res.code == 200 ){
+          if(res.result.songCount == 0 ){
+            this.$toast('已经到底了~');
+            return;
+          }
           if(this.historySearchList.length >= 10){
             this.historySearchList.pop();
           }
-          this.historySearchList.unshift(this.searchValue);
+          let isAdd =  this.historySearchList.findIndex(item=>{
+            return item == this.searchValue
+          })
+          if(isAdd == -1){
+            this.historySearchList.unshift(this.searchValue);
+          }
           localStorage.setItem("historySearchList",JSON.stringify(this.historySearchList));
           this.dataList=res.result.songs;
-          this.$toast.clear();
         }
       })
     },
@@ -131,6 +140,22 @@ name: "searchView",
         this.get(searchHot,{}).then((res)=>{
           resolve(res)
         })
+      })
+    },
+    requestMusicUrl(id){
+      return new Promise((resolve)=>{
+        this.get(getMusicUrl,{id}).then(res=>{
+          resolve(res);
+        })
+      })
+    },
+    /**
+     * 点击歌曲
+     */
+    openMusic(item){
+      console.log(item);
+      this.requestMusicUrl(item.id).then(res=>{
+        console.log(res);
       })
     },
     onLoad() {
@@ -164,6 +189,7 @@ name: "searchView",
 
 <style scoped lang="scss">
     .seachView{
+      background-color: #f7f8fa;
       .seachTips{
         position: relative;
         background-color: #fff;
@@ -174,6 +200,7 @@ name: "searchView",
           margin: 0px auto;
           font-size: rems(24px);
           .search_title{
+            margin-left: rems(10px);
             font-weight: 600;
             .tag_clearAll{
               background-color: #f7f7f7;
@@ -183,7 +210,8 @@ name: "searchView",
             }
           }
           .searchTipList span{
-            margin: rems(10px) rems(4px);
+            margin-right:  rems(4px);
+            margin-top: rems(10px);
             //font-weight: 400;'
           }
           .tag_search{
@@ -193,10 +221,30 @@ name: "searchView",
         }
 
       }
+      .seachList{
+        width: 96%;
+        margin: 0px auto;
+        margin-top: rems(20px);
+        padding: rems(5px);
+        border-radius: 5px;
+      }
       .music_user_name  {
         font-size: rems(10px);
         line-height: rems(30px);
-        border-bottom: 1px solid #000;
+        border-bottom: 1px solid #eaebec;
+        color: #bcbdbe;
+        .music_title{
+          color: #577cae;
+          font-size: rems(26px);
+          line-height: rems(30px);
+          .music_alias{
+            color: #bcbdbe;
+          }
+        }
+        .music_author{
+          color: #bcbdbe;
+          margin-top: rems(10px);
+        }
       }
     }
 

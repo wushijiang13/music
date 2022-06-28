@@ -15,7 +15,7 @@ module.exports={
 
    chainWebpack:config =>{
         config.plugin('html').tap(arg=>{
-             arg[0].title='QQ音乐时尚潮流';
+             arg[0].title='网抑云-破解版';
              return arg;
         })
        const oneOfsMap = config.module.rule("scss").oneOfs.store;

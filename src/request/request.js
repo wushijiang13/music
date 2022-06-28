@@ -1,10 +1,23 @@
 import Vue from 'vue'
 import axios from 'axios';
+import {Toast} from 'vant'
 //然后再修改原型链
 Vue.prototype.$axios = axios
 axios.defaults.timeout = 5000;
 
-let BASE_URL=process.env.BASE_URL  ? process.env.BASE_URL : "http://192.168.43.241:3000" ;
+let BASE_URL=process.env.BASE_URL  ? process.env.BASE_URL : "http://localhost:3000" ;
+
+axios.interceptors.response.use((res)=>{
+    let data = res.data;
+    if (data.code != 200) {
+        Toast.loading({
+            message: data.message,
+            forbidClick: true,
+        });
+    }
+    return res;
+})
+
 /**
  * 封装get方法
  * @param url
